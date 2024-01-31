@@ -1,0 +1,89 @@
+#Average Calculation
+%AveragePYEURMargin = CALCULATE((+[AveragePYEUR]-[AvgPYQ/PYEUR])/[AveragePYEUR])
+
+#Percentage Calculation
+%CYEUR-TARGET = CALCULATE(([CYEUR]/[Target YTD])-1)
+
+#Percentage with If Statement
+%Q FB = IF( [FB] > 0 && [TQSC PY FB] > 0, CALCULATE(([TQSC FB]/[TQSC PY FB])-1) )
+
+#Percentage Cum
+%Val.CumEUR = CALCULATE([Cum.CYEURM]/[Cum.PYEURM-])
+
+Cum.CYEURM = 
+CALCULATE(
+	[CYEUR],
+	FILTER(
+		ALLSELECTED('Months'[Month No]),
+		ISONORAFTER('Months'[Month No], MAX('Months'[Month No]), DESC)
+	)
+)
+
+Cum.PYWEUR = 
+CALCULATE(
+	[PYEUR],
+	FILTER(
+		ALLSELECTED('Week No'[Week No]),
+		ISONORAFTER('Week No'[Week No], MAX('Week No'[Week No]), DESC)
+	)
+)
+
+CYEUR = CALCULATE(sum('TableName'[LINEAMOUNT]), 'TableName'[Year]=(year(TODAY())))
+
+#PY Amount 
+PY = CALCULATE(sum('TableName'[AMOUNT]), 'TableName'[Year]=(year(TODAY())-1))
+
+#CY - PY YTD
+CYEURVYTDvPYVYTD = [CYEUR]-[PYEUR YTD]
+
+#PY YTD
+PY YTD = 
+if (DAY(TODAY()) <= 2, 
+
+CALCULATE(sum('TableName'[LINEAMOUNT]),
+DATESBETWEEN('TableName'[INVOICEDATE],
+DATE(YEAR(TODAY())-1,1,1),
+DATE(YEAR(TODAY())-1,MONTH(TODAY())-1,DAY(EOMONTH(TODAY(),-1)))
+)
+)
+
+,
+
+CALCULATE(sum('TableName'[LINEAMOUNT]),
+DATESBETWEEN('TableName'[INVOICEDATE],
+DATE(YEAR(TODAY())-1,1,1),
+DATE(YEAR(TODAY())-1,MONTH(TODAY()),DAY(TODAY()-1))
+)
+)
+
+)
+
+#Calculate Sum with Filter
+TQSC FB = CALCULATE(
+sum('TableName'[QTY]),
+FILTER(
+ALL('TableName'[CATEGORY_NAME]),
+'TableName'[CATEGORY_NAME] = "FB"
+), 'TableName'[Year]=(year(TODAY()))
+)
+
+#Calculte Sum with Multilple Filters
+Web = CALCULATE(sum('TableName'[QUANTITY]), ('TableName'[WAREHOUSEID]="BRL"),('TableName1'[CUSTTYPE]="WEB"),
+FILTER(
+ALL('TableName2'[SERIES]),
+'TableName2'[SERIES] = "2024"  || 'TableName2'[SERIES] = "2025"
+))
+
+Web1 = CALCULATE(
+sum('TableName'[QTY]),
+(LEFT('TableName'[CUSTOMERREQ], 3) <> "VAT"),
+(LEFT('TableName'[CUSTOMERREQ], 5) <> "Price"),
+(LEFT('TableName'[CUSTOMERREQ], 8) <> "Discount"),
+FILTER(
+ALL('TableName1'[SERIES]),
+'TableName1'[SERIES] = "2024"  || 'TableName1'[SERIES] = "2025"
+)
+)
+
+#If Statement
+Res = If(('TableName'[Col]>'TableName2'[QTY]),('TableName'[PostDated]-'TableName2'[QTY]),0)

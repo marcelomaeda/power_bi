@@ -1,0 +1,17 @@
+#Add Column with If Statement
+= Table.AddColumn(#"Extracted Date", "SALECOSTAMOUNT", each if [SALESCOSTVALUEPERUNIT] > 0 then [SALESCOSTVALUEPERUNIT]*[QTY] else 0)
+
+#Add Coumn with /
+= Table.AddColumn(#"Added Custom", "LINEUNIT", each [LINEAMOUNT]/[QTY])
+
+#Change Type
+= Table.TransformColumnTypes(#"Added Custom1",{{"LINEUNIT", type number}})
+
+#Add Column with -
+= Table.AddColumn(#"Changed Type1", "COST-PROFITUNIT", each [PROFITUNIT]-[SALESCOSTVALUEPERUNIT])
+
+#Add Column with / and % and If Statement
+= Table.AddColumn(#"Changed Type2", "%AVERAGEPROFITCOST", each if [SALECOSTAMOUNT] > 0 then ([LINEAMOUNT]-[SALECOSTAMOUNT])/[LINEAMOUNT] else 0)
+
+#Change Type
+= Table.TransformColumnTypes(#"Added Custom4",{{"%AVERAGEPROFITCOST", Percentage.Type}})
